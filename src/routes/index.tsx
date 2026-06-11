@@ -5,7 +5,11 @@ import { Countdown } from "@/components/Countdown";
 import { ProductCard } from "@/components/ProductCard";
 import { PRODUCTS } from "@/lib/products";
 import heroAsset from "@/assets/axys-hero.jpg.asset.json";
-import signatureTee from "@/assets/signature-tee.jpg";
+import signatureBlack1 from "@/assets/signature-black-1.png.asset.json";
+import signatureBlack2 from "@/assets/signature-black-2.png.asset.json";
+import signatureWhite1 from "@/assets/signature-white-1.png.asset.json";
+import signatureWhite2 from "@/assets/signature-white-2.png.asset.json";
+import signatureLabel from "@/assets/signature-label.png.asset.json";
 import barcodeBlack1 from "@/assets/barcode-black-1.png.asset.json";
 import barcodeBlack2 from "@/assets/barcode-black-2.png.asset.json";
 import barcodeWhite from "@/assets/barcode-white.png.asset.json";
@@ -29,6 +33,11 @@ const BARCODE_COLOR_IMAGES: Record<string, string> = {
   Black: barcodeBlack1.url,
   White: barcodeWhite.url,
   "Dusty Pink": barcodePink.url,
+};
+const SIGNATURE_IMAGES = [signatureBlack1.url, signatureWhite1.url, signatureBlack2.url, signatureWhite2.url, signatureLabel.url];
+const SIGNATURE_COLOR_IMAGES: Record<string, string> = {
+  Black: signatureBlack1.url,
+  White: signatureWhite1.url,
 };
 
 function HomePage() {
@@ -99,7 +108,7 @@ function Collection() {
             p.id === "barcode-tee" ? (
               <ProductCard key={p.id} product={p} images={BARCODE_IMAGES} colorImages={BARCODE_COLOR_IMAGES} />
             ) : (
-              <ProductCard key={p.id} product={p} image={signatureTee} />
+              <ProductCard key={p.id} product={p} images={SIGNATURE_IMAGES} colorImages={SIGNATURE_COLOR_IMAGES} />
             ),
           )}
         </div>
