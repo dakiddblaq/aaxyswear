@@ -34,6 +34,11 @@ const BARCODE_COLOR_IMAGES: Record<string, string> = {
   White: barcodeWhite.url,
   "Dusty Pink": barcodePink.url,
 };
+const SIGNATURE_IMAGES = [signatureBlack1.url, signatureWhite1.url, signatureBlack2.url, signatureWhite2.url, signatureLabel.url];
+const SIGNATURE_COLOR_IMAGES: Record<string, string> = {
+  Black: signatureBlack1.url,
+  White: signatureWhite1.url,
+};
 
 function HomePage() {
   return (
