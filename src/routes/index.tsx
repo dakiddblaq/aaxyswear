@@ -6,7 +6,11 @@ import { ProductCard } from "@/components/ProductCard";
 import { PRODUCTS } from "@/lib/products";
 import heroAsset from "@/assets/axys-hero.jpg.asset.json";
 import signatureTee from "@/assets/signature-tee.jpg";
-import barcodeTee from "@/assets/barcode-tee.jpg";
+import barcodeBlack1 from "@/assets/barcode-black-1.png.asset.json";
+import barcodeBlack2 from "@/assets/barcode-black-2.png.asset.json";
+import barcodeWhite from "@/assets/barcode-white.png.asset.json";
+import barcodePink from "@/assets/barcode-pink.png.asset.json";
+import barcodeLabel from "@/assets/barcode-label.png.asset.json";
 import { useState } from "react";
 
 export const Route = createFileRoute("/")({
@@ -20,9 +24,11 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-const PRODUCT_IMAGES: Record<string, string> = {
-  "signature-tee": signatureTee,
-  "barcode-tee": barcodeTee,
+const BARCODE_IMAGES = [barcodeBlack1.url, barcodeWhite.url, barcodePink.url, barcodeBlack2.url, barcodeLabel.url];
+const BARCODE_COLOR_IMAGES: Record<string, string> = {
+  Black: barcodeBlack1.url,
+  White: barcodeWhite.url,
+  "Dusty Pink": barcodePink.url,
 };
 
 function HomePage() {
@@ -89,9 +95,13 @@ function Collection() {
           </div>
         </div>
         <div className="grid gap-8 md:grid-cols-2 md:gap-10">
-          {PRODUCTS.map((p) => (
-            <ProductCard key={p.id} product={p} image={PRODUCT_IMAGES[p.id]} />
-          ))}
+          {PRODUCTS.map((p) =>
+            p.id === "barcode-tee" ? (
+              <ProductCard key={p.id} product={p} images={BARCODE_IMAGES} colorImages={BARCODE_COLOR_IMAGES} />
+            ) : (
+              <ProductCard key={p.id} product={p} image={signatureTee} />
+            ),
+          )}
         </div>
       </div>
     </section>
