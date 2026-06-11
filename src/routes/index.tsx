@@ -108,7 +108,7 @@ function Collection() {
             p.id === "barcode-tee" ? (
               <ProductCard key={p.id} product={p} images={BARCODE_IMAGES} colorImages={BARCODE_COLOR_IMAGES} />
             ) : (
-              <ProductCard key={p.id} product={p} image={signatureTee} />
+              <ProductCard key={p.id} product={p} images={SIGNATURE_IMAGES} colorImages={SIGNATURE_COLOR_IMAGES} />
             ),
           )}
         </div>
