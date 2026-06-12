@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 
-const TARGET = Date.now() + 1000 * 60 * 60 * 24 * 14;
+const TARGET = new Date("2026-07-31T00:00:00+02:00").getTime();
 
 export function Countdown() {
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState(TARGET);
   useEffect(() => {
+    setNow(Date.now());
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
