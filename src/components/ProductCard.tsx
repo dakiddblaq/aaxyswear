@@ -181,10 +181,7 @@ function ProductDetailDialog({
               </div>
             </div>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <button type="button" onClick={addToCart} className="btn-outline pill w-full sm:flex-1">
-                {added ? "Added ✓" : "Add To Cart"}
-              </button>
+            <div className="mt-8">
               <Link
                 to="/checkout"
                 search={{ product: product.id, color, size: size ?? "", qty }}
@@ -194,7 +191,7 @@ function ProductDetailDialog({
                     alert("Please select a size.");
                   }
                 }}
-                className="btn-primary pill w-full sm:flex-1"
+                className="btn-primary pill w-full"
               >
                 Checkout
               </Link>
