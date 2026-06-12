@@ -68,8 +68,8 @@ function Hero() {
           Exclusivity. Ambition. Prestige. Every piece is crafted for those who refuse to settle.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <a href="#collection" className="btn-primary border border-white bg-white text-black hover:opacity-90">Shop Collection</a>
-          <a href="#inner-circle" className="btn-secondary">Join The Inner Circle</a>
+          <a href="#collection" className="btn-primary pill border border-white bg-white text-black hover:opacity-90">Shop Collection</a>
+          <a href="#inner-circle" className="btn-secondary pill">Join The Inner Circle</a>
         </div>
       </div>
     </section>
