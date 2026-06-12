@@ -78,7 +78,7 @@ function ProductDetailDialog({
   const [color, setColor] = useState(product.colors[0]);
   const [size, setSize] = useState<string | null>(null);
   const [qty, setQty] = useState(1);
-  const [added, setAdded] = useState(false);
+  const [lightbox, setLightbox] = useState(false);
 
   const main = images[activeIdx] ?? images[0];
 
@@ -91,30 +91,29 @@ function ProductDetailDialog({
     }
   }
 
-  function addToCart() {
-    if (!size) return alert("Please select a size.");
-    try {
-      const raw = localStorage.getItem("axys:cart");
-      const cart = raw ? JSON.parse(raw) : [];
-      cart.push({ id: product.id, name: product.name, price: product.price, color, size, qty, addedAt: Date.now() });
-      localStorage.setItem("axys:cart", JSON.stringify(cart));
-      setAdded(true);
-      setTimeout(() => setAdded(false), 2200);
-    } catch {}
-  }
+  function prev() { setActiveIdx((i) => (i - 1 + images.length) % images.length); }
+  function next() { setActiveIdx((i) => (i + 1) % images.length); }
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="pill max-h-[95vh] w-[96vw] max-w-[1200px] overflow-y-auto border border-border bg-white p-0">
+
         <DialogTitle className="sr-only">{product.name}</DialogTitle>
         <DialogDescription className="sr-only">{product.shortDescription}</DialogDescription>
 
         <div className="grid gap-0 md:grid-cols-2">
           {/* Gallery */}
           <div className="bg-secondary">
-            <div className="aspect-square w-full overflow-hidden bg-white">
-              {main && <img src={main} alt={product.name} className="h-full w-full object-cover" />}
-            </div>
+            <button
+              type="button"
+              onClick={() => setLightbox(true)}
+              aria-label="Zoom image"
+              className="group relative block aspect-square w-full overflow-hidden bg-white"
+            >
+              {main && <img src={main} alt={product.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />}
+              <span className="pill pointer-events-none absolute bottom-3 right-3 bg-black/70 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-white" style={{ borderRadius: 999 }}>Tap to zoom</span>
+            </button>
             <div className="grid grid-cols-5 gap-px border-t border-border bg-border">
               {images.map((src, i) => (
                 <button
@@ -181,10 +180,7 @@ function ProductDetailDialog({
               </div>
             </div>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <button type="button" onClick={addToCart} className="btn-outline pill w-full sm:flex-1">
-                {added ? "Added ✓" : "Add To Cart"}
-              </button>
+            <div className="mt-8">
               <Link
                 to="/checkout"
                 search={{ product: product.id, color, size: size ?? "", qty }}
@@ -194,7 +190,7 @@ function ProductDetailDialog({
                     alert("Please select a size.");
                   }
                 }}
-                className="btn-primary pill w-full sm:flex-1"
+                className="btn-primary pill w-full"
               >
                 Checkout
               </Link>
@@ -257,5 +253,44 @@ function ProductDetailDialog({
         </div>
       </DialogContent>
     </Dialog>
+
+    {lightbox && (
+      <div
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4"
+        onClick={() => setLightbox(false)}
+      >
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setLightbox(false); }}
+          aria-label="Close"
+          className="pill absolute right-4 top-4 h-10 w-10 border border-white/30 text-white hover:bg-white hover:text-black"
+          style={{ borderRadius: 999 }}
+        >✕</button>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); prev(); }}
+          aria-label="Previous"
+          className="pill absolute left-4 top-1/2 h-12 w-12 -translate-y-1/2 border border-white/30 text-white hover:bg-white hover:text-black"
+          style={{ borderRadius: 999 }}
+        >‹</button>
+        <img
+          src={main}
+          alt={product.name}
+          onClick={(e) => e.stopPropagation()}
+          className="max-h-[90vh] max-w-[92vw] object-contain"
+        />
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); next(); }}
+          aria-label="Next"
+          className="pill absolute right-4 top-1/2 h-12 w-12 -translate-y-1/2 border border-white/30 text-white hover:bg-white hover:text-black"
+          style={{ borderRadius: 999 }}
+        >›</button>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs uppercase tracking-[0.2em] text-white/70">
+          {activeIdx + 1} / {images.length}
+        </div>
+      </div>
+    )}
+    </>
   );
 }
