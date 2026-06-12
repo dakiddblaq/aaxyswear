@@ -181,8 +181,8 @@ function InnerCircle() {
               placeholder="Email Address"
               className="h-12 border border-white/20 bg-transparent px-4 text-sm text-white placeholder:text-white/40 focus:border-white focus:outline-none"
             />
-            <button type="submit" className="h-12 border border-white bg-white px-6 text-[11px] font-medium uppercase tracking-[0.18em] text-foreground hover:opacity-90">
-              Join Now
+            <button type="submit" className="pill h-12 border border-white bg-white px-8 text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground transition-all hover:-translate-y-0.5 hover:shadow-lg" style={{ borderRadius: 999 }}>
+              Join Waitlist
             </button>
             {err && <div className="text-xs text-red-300 sm:col-span-3">{err}</div>}
           </form>

@@ -60,7 +60,7 @@
 }
 
 @layer base {
-  * {
+  *:not(.pill):not(.pill *) {
     border-color: var(--color-border);
     border-radius: 0 !important;
   }
@@ -93,16 +93,17 @@
   justify-content: center;
   background: #111;
   color: #fff;
-  padding: 1rem 2rem;
-  font-size: 0.75rem;
+  padding: 1rem 2.25rem;
+  font-size: 0.72rem;
   letter-spacing: var(--tracking-luxury);
   text-transform: uppercase;
-  font-weight: 500;
+  font-weight: 600;
   border: 1px solid #111;
-  transition: opacity 0.2s;
+  border-radius: 999px !important;
+  transition: all 0.25s ease;
   cursor: pointer;
-  &:hover { opacity: 0.85; }
-  &:disabled { opacity: 0.35; cursor: not-allowed; }
+  &:hover { background: #000; transform: translateY(-1px); box-shadow: 0 8px 24px -8px rgba(0,0,0,0.4); }
+  &:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
 }
 
 @utility btn-secondary {
@@ -111,13 +112,14 @@
   justify-content: center;
   background: transparent;
   color: #fff;
-  padding: 1rem 2rem;
-  font-size: 0.75rem;
+  padding: 1rem 2.25rem;
+  font-size: 0.72rem;
   letter-spacing: var(--tracking-luxury);
   text-transform: uppercase;
-  font-weight: 500;
+  font-weight: 600;
   border: 1px solid #fff;
-  transition: all 0.2s;
+  border-radius: 999px !important;
+  transition: all 0.25s ease;
   cursor: pointer;
   &:hover { background: #fff; color: #111; }
 }
@@ -128,13 +130,14 @@
   justify-content: center;
   background: transparent;
   color: #111;
-  padding: 0.9rem 1.5rem;
+  padding: 0.9rem 1.75rem;
   font-size: 0.7rem;
   letter-spacing: var(--tracking-luxury);
   text-transform: uppercase;
-  font-weight: 500;
+  font-weight: 600;
   border: 1px solid #111;
-  transition: all 0.2s;
+  border-radius: 999px !important;
+  transition: all 0.25s ease;
   cursor: pointer;
   &:hover { background: #111; color: #fff; }
 }
