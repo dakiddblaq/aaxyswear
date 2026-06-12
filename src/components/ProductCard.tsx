@@ -78,7 +78,7 @@ function ProductDetailDialog({
   const [color, setColor] = useState(product.colors[0]);
   const [size, setSize] = useState<string | null>(null);
   const [qty, setQty] = useState(1);
-  const [added, setAdded] = useState(false);
+  const [lightbox, setLightbox] = useState(false);
 
   const main = images[activeIdx] ?? images[0];
 
@@ -91,21 +91,14 @@ function ProductDetailDialog({
     }
   }
 
-  function addToCart() {
-    if (!size) return alert("Please select a size.");
-    try {
-      const raw = localStorage.getItem("axys:cart");
-      const cart = raw ? JSON.parse(raw) : [];
-      cart.push({ id: product.id, name: product.name, price: product.price, color, size, qty, addedAt: Date.now() });
-      localStorage.setItem("axys:cart", JSON.stringify(cart));
-      setAdded(true);
-      setTimeout(() => setAdded(false), 2200);
-    } catch {}
-  }
+  function prev() { setActiveIdx((i) => (i - 1 + images.length) % images.length); }
+  function next() { setActiveIdx((i) => (i + 1) % images.length); }
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="pill max-h-[95vh] w-[96vw] max-w-[1200px] overflow-y-auto border border-border bg-white p-0">
+
         <DialogTitle className="sr-only">{product.name}</DialogTitle>
         <DialogDescription className="sr-only">{product.shortDescription}</DialogDescription>
 
