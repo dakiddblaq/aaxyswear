@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
@@ -81,6 +81,16 @@ function ProductDetailDialog({
   const [lightbox, setLightbox] = useState(false);
 
   const main = images[activeIdx] ?? images[0];
+  const imageKey = images.join("|");
+
+  useEffect(() => {
+    if (!open && !lightbox) return;
+    images.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+      img.decode?.().catch(() => undefined);
+    });
+  }, [open, lightbox, imageKey]);
 
   function selectColor(c: string) {
     setColor(c);
@@ -90,9 +100,6 @@ function ProductDetailDialog({
       if (i >= 0) setActiveIdx(i);
     }
   }
-
-  function prev() { setActiveIdx((i) => (i - 1 + images.length) % images.length); }
-  function next() { setActiveIdx((i) => (i + 1) % images.length); }
 
   return (
     <>
