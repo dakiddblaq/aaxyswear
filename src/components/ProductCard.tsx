@@ -97,7 +97,8 @@ function ProductDetailDialog({
   useEffect(() => {
     if (!lightbox) return;
     const frame = requestAnimationFrame(() => {
-      lightboxRef.current?.scrollTo({ left: activeIdx * lightboxRef.current.clientWidth, behavior: "instant" });
+      const el = lightboxRef.current;
+      if (el) el.scrollLeft = activeIdx * el.clientWidth;
     });
     return () => cancelAnimationFrame(frame);
   }, [lightbox]);
@@ -283,39 +284,47 @@ function ProductDetailDialog({
     </Dialog>
 
     {lightbox && (
-      <div
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4"
-        onClick={() => setLightbox(false)}
-      >
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); setLightbox(false); }}
-          aria-label="Close"
-          className="pill absolute right-4 top-4 h-10 w-10 border border-white/30 text-white hover:bg-white hover:text-black"
-          style={{ borderRadius: 999 }}
-        >✕</button>
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); prev(); }}
-          aria-label="Previous"
-          className="pill absolute left-4 top-1/2 h-12 w-12 -translate-y-1/2 border border-white/30 text-white hover:bg-white hover:text-black"
-          style={{ borderRadius: 999 }}
-        >‹</button>
-        <img
-          src={main}
-          alt={product.name}
-          onClick={(e) => e.stopPropagation()}
-          className="max-h-[90vh] max-w-[92vw] object-contain"
-        />
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); next(); }}
-          aria-label="Next"
-          className="pill absolute right-4 top-1/2 h-12 w-12 -translate-y-1/2 border border-white/30 text-white hover:bg-white hover:text-black"
-          style={{ borderRadius: 999 }}
-        >›</button>
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs uppercase tracking-[0.2em] text-white/70">
-          {activeIdx + 1} / {images.length}
+      <div className="fixed inset-0 z-[100] bg-black text-white">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 bg-gradient-to-b from-black via-black/70 to-transparent px-4 pb-8 pt-4 md:px-8 md:pt-6">
+          <button
+            type="button"
+            onClick={() => setLightbox(false)}
+            className="btn-secondary pill pointer-events-auto min-h-11 px-6 py-3 text-[0.68rem] active:scale-[0.98]"
+          >
+            Back
+          </button>
+        </div>
+
+        <div
+          ref={lightboxRef}
+          onScroll={handleLightboxScroll}
+          className="flex h-dvh w-screen snap-x snap-mandatory overflow-x-auto overscroll-contain scroll-smooth [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          style={{ touchAction: "pan-x pinch-zoom" }}
+        >
+          {images.map((src, i) => (
+            <figure
+              key={`${src}-lightbox-${i}`}
+              className="flex h-dvh w-screen shrink-0 snap-center items-center justify-center px-3 py-20 md:px-10"
+            >
+              <img
+                src={src}
+                alt={`${product.name} fullscreen view ${i + 1}`}
+                loading="eager"
+                decoding="async"
+                draggable={false}
+                className="max-h-full max-w-full select-none object-contain [content-visibility:auto]"
+              />
+            </figure>
+          ))}
+        </div>
+
+        <div className="pointer-events-none absolute bottom-5 left-1/2 flex -translate-x-1/2 gap-2 md:bottom-8">
+          {images.map((src, i) => (
+            <span
+              key={`${src}-dot-${i}`}
+              className={`h-1.5 rounded-full transition-all ${activeIdx === i ? "w-6 bg-white" : "w-1.5 bg-white/35"}`}
+            />
+          ))}
         </div>
       </div>
     )}
