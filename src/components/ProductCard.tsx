@@ -303,7 +303,7 @@ function ProductDetailDialog({
     </Dialog>
 
     {lightbox && (
-      <div className="fixed inset-0 z-[100] touch-none overflow-hidden bg-black text-white">
+      <div className="fixed inset-0 z-[100] overflow-hidden overscroll-none bg-black text-white">
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 bg-gradient-to-b from-black via-black/70 to-transparent px-4 pb-8 pt-4 md:px-8 md:pt-6">
           <button
             type="button"
