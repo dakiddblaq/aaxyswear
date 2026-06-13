@@ -79,6 +79,8 @@ function ProductDetailDialog({
   const [size, setSize] = useState<string | null>(null);
   const [qty, setQty] = useState(1);
   const [lightbox, setLightbox] = useState(false);
+  const lightboxRef = useRef<HTMLDivElement | null>(null);
+  const scrollRaf = useRef<number | null>(null);
 
   const main = images[activeIdx] ?? images[0];
   const imageKey = images.join("|");
@@ -91,6 +93,25 @@ function ProductDetailDialog({
       img.decode?.().catch(() => undefined);
     });
   }, [open, lightbox, imageKey]);
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const frame = requestAnimationFrame(() => {
+      lightboxRef.current?.scrollTo({ left: activeIdx * lightboxRef.current.clientWidth, behavior: "instant" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [lightbox]);
+
+  function handleLightboxScroll() {
+    if (scrollRaf.current !== null) return;
+    scrollRaf.current = requestAnimationFrame(() => {
+      scrollRaf.current = null;
+      const el = lightboxRef.current;
+      if (!el) return;
+      const nextIdx = Math.round(el.scrollLeft / Math.max(1, el.clientWidth));
+      if (nextIdx !== activeIdx && nextIdx >= 0 && nextIdx < images.length) setActiveIdx(nextIdx);
+    });
+  }
 
   function selectColor(c: string) {
     setColor(c);
@@ -126,7 +147,7 @@ function ProductDetailDialog({
                 <button
                   key={src + i}
                   type="button"
-                  onClick={() => setActiveIdx(i)}
+                  onClick={() => { setActiveIdx(i); setLightbox(true); }}
                   className={`aspect-square overflow-hidden bg-white ${activeIdx === i ? "ring-2 ring-inset ring-foreground" : ""}`}
                 >
                   <img src={src} alt={`${product.name} view ${i + 1}`} loading="lazy" className="h-full w-full object-cover" />
