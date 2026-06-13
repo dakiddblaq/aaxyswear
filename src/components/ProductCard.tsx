@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Dialog, DialogClose, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { SIZES, SIZE_CHART, FIT_NOTES, SHIPPING_INFO, type Product } from "@/lib/products";
 
@@ -106,7 +106,7 @@ function ProductDetailDialog({
     document.body.style.overscrollBehavior = "none";
     const frame = requestAnimationFrame(() => {
       const el = lightboxRef.current;
-      if (el) el.scrollTo({ left: activeIdx * el.clientWidth, behavior: "instant" });
+      if (el) el.scrollTo({ left: activeIdx * el.clientWidth, behavior: "auto" });
     });
     return () => {
       cancelAnimationFrame(frame);
@@ -114,9 +114,9 @@ function ProductDetailDialog({
       scrollRaf.current = null;
       document.documentElement.style.overflow = originalOverflow;
       document.body.style.overscrollBehavior = originalOverscroll;
-      window.scrollTo({ top: lastScrollY.current, behavior: "instant" });
+      window.scrollTo({ top: lastScrollY.current, behavior: "auto" });
     };
-  }, [lightbox, activeIdx]);
+  }, [lightbox]);
 
   function closeLightbox() {
     setLightbox(false);
