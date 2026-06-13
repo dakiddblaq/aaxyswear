@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { SIZES, SIZE_CHART, FIT_NOTES, SHIPPING_INFO, type Product } from "@/lib/products";
 
@@ -81,6 +81,7 @@ function ProductDetailDialog({
   const [lightbox, setLightbox] = useState(false);
   const lightboxRef = useRef<HTMLDivElement | null>(null);
   const scrollRaf = useRef<number | null>(null);
+  const lastScrollY = useRef(0);
 
   const main = images[activeIdx] ?? images[0];
   const imageKey = images.join("|");
@@ -90,18 +91,36 @@ function ProductDetailDialog({
     images.forEach((src) => {
       const img = new Image();
       img.src = src;
+      img.loading = "eager";
+      img.decoding = "async";
       img.decode?.().catch(() => undefined);
     });
   }, [open, lightbox, imageKey]);
 
   useEffect(() => {
     if (!lightbox) return;
+    lastScrollY.current = window.scrollY;
+    const originalOverflow = document.documentElement.style.overflow;
+    const originalOverscroll = document.body.style.overscrollBehavior;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
     const frame = requestAnimationFrame(() => {
       const el = lightboxRef.current;
-      if (el) el.scrollLeft = activeIdx * el.clientWidth;
+      if (el) el.scrollTo({ left: activeIdx * el.clientWidth, behavior: "instant" });
     });
-    return () => cancelAnimationFrame(frame);
-  }, [lightbox]);
+    return () => {
+      cancelAnimationFrame(frame);
+      if (scrollRaf.current !== null) cancelAnimationFrame(scrollRaf.current);
+      scrollRaf.current = null;
+      document.documentElement.style.overflow = originalOverflow;
+      document.body.style.overscrollBehavior = originalOverscroll;
+      window.scrollTo({ top: lastScrollY.current, behavior: "instant" });
+    };
+  }, [lightbox, activeIdx]);
+
+  function closeLightbox() {
+    setLightbox(false);
+  }
 
   function handleLightboxScroll() {
     if (scrollRaf.current !== null) return;
@@ -126,7 +145,7 @@ function ProductDetailDialog({
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="pill max-h-[95vh] w-[96vw] max-w-[1200px] overflow-y-auto border border-border bg-white p-0">
+      <DialogContent hideClose={lightbox} className="pill max-h-[95vh] w-[96vw] max-w-[1200px] overflow-y-auto border border-border bg-white p-0">
 
         <DialogTitle className="sr-only">{product.name}</DialogTitle>
         <DialogDescription className="sr-only">{product.shortDescription}</DialogDescription>
@@ -284,11 +303,11 @@ function ProductDetailDialog({
     </Dialog>
 
     {lightbox && (
-      <div className="fixed inset-0 z-[100] bg-black text-white">
+      <div className="fixed inset-0 z-[100] touch-none overflow-hidden bg-black text-white">
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 bg-gradient-to-b from-black via-black/70 to-transparent px-4 pb-8 pt-4 md:px-8 md:pt-6">
           <button
             type="button"
-            onClick={() => setLightbox(false)}
+            onClick={closeLightbox}
             className="btn-secondary pill pointer-events-auto min-h-11 px-6 py-3 text-[0.68rem] active:scale-[0.98]"
           >
             Back
@@ -298,7 +317,7 @@ function ProductDetailDialog({
         <div
           ref={lightboxRef}
           onScroll={handleLightboxScroll}
-          className="flex h-dvh w-screen snap-x snap-mandatory overflow-x-auto overscroll-contain scroll-smooth [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex h-dvh w-screen snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain overscroll-y-none [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           style={{ touchAction: "pan-x pinch-zoom" }}
         >
           {images.map((src, i) => (
@@ -312,7 +331,7 @@ function ProductDetailDialog({
                 loading="eager"
                 decoding="async"
                 draggable={false}
-                className="max-h-full max-w-full select-none object-contain [content-visibility:auto]"
+                className="max-h-full max-w-full select-none object-contain will-change-transform [content-visibility:auto]"
               />
             </figure>
           ))}
