@@ -3,7 +3,13 @@ import { useMemo, useState } from "react";
 import { z } from "zod";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { PRODUCTS, DELIVERY_FEE, PAYSTACK_URL } from "@/lib/products";
+import { PRODUCTS, PAYSTACK_URL } from "@/lib/products";
+
+const SHIPPING_OPTIONS = [
+  { id: "economy", label: "AXYS Economy", price: 80, eta: "2–9 business days" },
+  { id: "express", label: "AXYS Express", price: 150, eta: "1–3 business days" },
+] as const;
+type ShippingId = (typeof SHIPPING_OPTIONS)[number]["id"];
 
 const searchSchema = z.object({
   product: z.string().default(""),
