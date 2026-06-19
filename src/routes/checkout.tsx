@@ -45,8 +45,12 @@ function CheckoutPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
+  const [shippingId, setShippingId] = useState<ShippingId>("economy");
+  const shipping = SHIPPING_OPTIONS.find((s) => s.id === shippingId)!;
+
   const subtotal = product.price * qty;
-  const total = subtotal + DELIVERY_FEE;
+  const deliveryFee = shipping.price;
+  const total = subtotal + deliveryFee;
 
   function set<K extends keyof FormState>(k: K, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
