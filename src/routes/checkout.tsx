@@ -88,6 +88,7 @@ function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {loading && <CheckoutLoader />}
       <Header />
       <main className="mx-auto max-w-[1200px] px-5 py-12 md:px-10 md:py-20">
         <div className="mb-10">
