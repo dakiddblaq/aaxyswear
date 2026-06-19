@@ -3,7 +3,13 @@ import { useMemo, useState } from "react";
 import { z } from "zod";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { PRODUCTS, DELIVERY_FEE, PAYSTACK_URL } from "@/lib/products";
+import { PRODUCTS, PAYSTACK_URL } from "@/lib/products";
+
+const SHIPPING_OPTIONS = [
+  { id: "economy", label: "AXYS Economy", price: 80, eta: "2–9 business days" },
+  { id: "express", label: "AXYS Express", price: 150, eta: "1–3 business days" },
+] as const;
+type ShippingId = (typeof SHIPPING_OPTIONS)[number]["id"];
 
 const searchSchema = z.object({
   product: z.string().default(""),
@@ -39,8 +45,12 @@ function CheckoutPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
+  const [shippingId, setShippingId] = useState<ShippingId>("economy");
+  const shipping = SHIPPING_OPTIONS.find((s) => s.id === shippingId)!;
+
   const subtotal = product.price * qty;
-  const total = subtotal + DELIVERY_FEE;
+  const deliveryFee = shipping.price;
+  const total = subtotal + deliveryFee;
 
   function set<K extends keyof FormState>(k: K, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -75,13 +85,14 @@ function CheckoutPage() {
         "axys:lastOrder",
         JSON.stringify({
           orderId, status: "Awaiting Payment",
-          product: product.name, color, size, qty, subtotal, deliveryFee: DELIVERY_FEE, total,
+          product: product.name, color, size, qty, subtotal,
+          shippingMethod: shipping.label, shippingEta: shipping.eta, deliveryFee, total,
           customer: form, createdAt: new Date().toISOString(),
         }),
       );
     } catch {}
     await new Promise((r) => setTimeout(r, 3000));
-    const url = `${PAYSTACK_URL}?reference=${encodeURIComponent(orderId)}&amount=${total}`;
+    const url = `${PAYSTACK_URL}?reference=${encodeURIComponent(orderId)}&amount=${total}&shipping=${encodeURIComponent(shipping.id)}`;
     window.open(url, "_blank", "noopener,noreferrer");
     navigate({ to: "/success", search: { order: orderId } });
   }
@@ -149,6 +160,36 @@ function CheckoutPage() {
                 </Field>
               </Grid>
             </Section>
+
+            <Section title="Shipping Method">
+              <div className="grid gap-3 sm:grid-cols-2">
+                {SHIPPING_OPTIONS.map((opt) => {
+                  const active = shippingId === opt.id;
+                  return (
+                    <label
+                      key={opt.id}
+                      className={`flex cursor-pointer items-start gap-3 border bg-white p-4 transition-colors ${active ? "border-foreground ring-1 ring-foreground" : "border-border hover:border-foreground/40"}`}
+                    >
+                      <input
+                        type="radio"
+                        name="shipping"
+                        value={opt.id}
+                        checked={active}
+                        onChange={() => setShippingId(opt.id)}
+                        className="mt-1 h-4 w-4 accent-black"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-sm font-semibold uppercase tracking-wide">{opt.label}</span>
+                          <span className="font-display text-base font-black">R{opt.price}</span>
+                        </div>
+                        <div className="mt-1 text-xs text-muted-foreground">{opt.eta}</div>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            </Section>
           </div>
 
           <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
@@ -160,16 +201,18 @@ function CheckoutPage() {
                 <Row k="Size" v={size || "—"} />
                 <Row k="Quantity" v={String(qty)} />
                 <Row k="Unit Price" v={`R${product.price}`} />
+                <Row k="Shipping" v={`${shipping.label} · ${shipping.eta}`} />
               </div>
               <div className="mt-5 space-y-1 border-t border-border pt-5 text-sm">
                 <Row k="Subtotal" v={`R${subtotal}`} />
-                <Row k="Delivery Fee" v={`R${DELIVERY_FEE}`} />
+                <Row k="Delivery Fee" v={`R${deliveryFee}`} />
               </div>
               <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
                 <span className="text-xs uppercase tracking-[0.18em]">Total</span>
                 <span className="font-display text-2xl font-black">R{total}</span>
               </div>
             </div>
+
 
             <label className="flex cursor-pointer items-start gap-3 border border-border bg-white p-4 text-sm">
               <input
