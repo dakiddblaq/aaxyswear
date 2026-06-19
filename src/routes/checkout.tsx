@@ -85,7 +85,8 @@ function CheckoutPage() {
         "axys:lastOrder",
         JSON.stringify({
           orderId, status: "Awaiting Payment",
-          product: product.name, color, size, qty, subtotal, deliveryFee: DELIVERY_FEE, total,
+          product: product.name, color, size, qty, subtotal,
+          shippingMethod: shipping.label, shippingEta: shipping.eta, deliveryFee, total,
           customer: form, createdAt: new Date().toISOString(),
         }),
       );
