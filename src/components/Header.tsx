@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { TIKTOK_URL } from "@/lib/products";
 
 export function Header() {
   return (
@@ -9,9 +8,7 @@ export function Header() {
           AXYS
         </Link>
         <nav className="flex items-center gap-5 text-[11px] font-medium uppercase tracking-[0.18em] text-foreground md:gap-8">
-          <a href="/#collection" className="hover:text-muted-foreground">Collection</a>
-          <a href="/#about" className="hidden hover:text-muted-foreground sm:inline">About</a>
-          <a href={TIKTOK_URL} target="_blank" rel="noreferrer" className="hover:text-muted-foreground">TikTok</a>
+          <a href="/#about" className="hover:text-muted-foreground">About</a>
         </nav>
       </div>
     </header>
