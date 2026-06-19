@@ -31,8 +31,9 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-display: "Inter Tight", "Helvetica Neue", sans-serif;
-  --font-body: "Inter", "Helvetica Neue", sans-serif;
+  --font-display: "Bebas Neue", "Oswald", "Helvetica Neue", sans-serif;
+  --font-condensed: "Oswald", "Bebas Neue", "Helvetica Neue", sans-serif;
+  --font-body: "Montserrat", "Helvetica Neue", Arial, sans-serif;
   --tracking-luxury: 0.18em;
 }
 
