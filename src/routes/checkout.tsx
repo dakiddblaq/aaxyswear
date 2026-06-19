@@ -80,7 +80,7 @@ function CheckoutPage() {
         }),
       );
     } catch {}
-    await new Promise((r) => setTimeout(r, 700));
+    await new Promise((r) => setTimeout(r, 3000));
     const url = `${PAYSTACK_URL}?reference=${encodeURIComponent(orderId)}&amount=${total}`;
     window.open(url, "_blank", "noopener,noreferrer");
     navigate({ to: "/success", search: { order: orderId } });
