@@ -72,11 +72,21 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-body);
-    font-feature-settings: "ss01", "cv11";
+    font-weight: 400;
+    letter-spacing: 0.005em;
   }
   h1, h2, h3, h4, h5 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+  button, .btn, [role="button"] {
+    font-family: var(--font-condensed);
+  }
+  nav, label, .nav-link {
+    font-family: var(--font-body);
+    letter-spacing: 0.08em;
   }
 }
 
