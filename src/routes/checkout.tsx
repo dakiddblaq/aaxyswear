@@ -80,7 +80,7 @@ function CheckoutPage() {
         }),
       );
     } catch {}
-    await new Promise((r) => setTimeout(r, 700));
+    await new Promise((r) => setTimeout(r, 3000));
     const url = `${PAYSTACK_URL}?reference=${encodeURIComponent(orderId)}&amount=${total}`;
     window.open(url, "_blank", "noopener,noreferrer");
     navigate({ to: "/success", search: { order: orderId } });
@@ -88,6 +88,7 @@ function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {loading && <CheckoutLoader />}
       <Header />
       <main className="mx-auto max-w-[1200px] px-5 py-12 md:px-10 md:py-20">
         <div className="mb-10">
@@ -234,6 +235,33 @@ function Row({ k, v }: { k: string; v: string }) {
     <div className="flex justify-between gap-4">
       <span className="text-muted-foreground">{k}</span>
       <span className="text-foreground">{v}</span>
+    </div>
+  );
+}
+
+function CheckoutLoader() {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#f6f4ef] animate-[axysFade_400ms_ease-out]"
+    >
+      <div className="flex flex-col items-center gap-8 px-6 text-center">
+        <div className="font-display text-5xl font-black uppercase tracking-[0.35em] text-foreground md:text-7xl animate-[axysRise_900ms_ease-out_both]">
+          AXYS
+        </div>
+        <div className="h-px w-24 bg-foreground/20 overflow-hidden">
+          <div className="h-full w-full bg-foreground origin-left animate-[axysLine_2.6s_ease-in-out_forwards]" />
+        </div>
+        <div className="eyebrow text-foreground/60 animate-[axysFade_900ms_ease-out_300ms_both]">
+          Preparing Secure Payment
+        </div>
+      </div>
+      <style>{`
+        @keyframes axysFade { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes axysRise { from { opacity: 0; transform: translateY(12px); letter-spacing: 0.5em } to { opacity: 1; transform: translateY(0); letter-spacing: 0.35em } }
+        @keyframes axysLine { 0% { transform: scaleX(0) } 100% { transform: scaleX(1) } }
+      `}</style>
     </div>
   );
 }
