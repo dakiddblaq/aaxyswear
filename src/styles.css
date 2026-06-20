@@ -152,3 +152,19 @@
   cursor: pointer;
   &:hover { background: #111; color: #fff; }
 }
+
+@utility input-axys {
+  display: block;
+  width: 100%;
+  height: 3rem;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  color: var(--color-foreground);
+  transition: border-color 0.2s ease;
+  &:focus { outline: none; border-color: var(--color-foreground); }
+  &::placeholder { color: color-mix(in oklab, var(--color-muted-foreground) 60%, transparent); }
+}
+
