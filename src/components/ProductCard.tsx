@@ -104,6 +104,17 @@ function ProductDetailDialog({
     const originalOverscroll = document.body.style.overscrollBehavior;
     document.documentElement.style.overflow = "hidden";
     document.body.style.overscrollBehavior = "none";
+
+    // Push a history entry so the device/browser back button closes the
+    // lightbox instead of navigating away from the product page.
+    let poppedByUser = false;
+    window.history.pushState({ axysLightbox: true }, "");
+    const onPopState = () => {
+      poppedByUser = true;
+      setLightbox(false);
+    };
+    window.addEventListener("popstate", onPopState);
+
     const frame = requestAnimationFrame(() => {
       const el = lightboxRef.current;
       if (el) el.scrollTo({ left: activeIdx * el.clientWidth, behavior: "auto" });
@@ -112,6 +123,12 @@ function ProductDetailDialog({
       cancelAnimationFrame(frame);
       if (scrollRaf.current !== null) cancelAnimationFrame(scrollRaf.current);
       scrollRaf.current = null;
+      window.removeEventListener("popstate", onPopState);
+      // If closed via our Back button (not the device back), pop the entry
+      // we pushed so history stays clean.
+      if (!poppedByUser && window.history.state && (window.history.state as any).axysLightbox) {
+        window.history.back();
+      }
       document.documentElement.style.overflow = originalOverflow;
       document.body.style.overscrollBehavior = originalOverscroll;
       window.scrollTo({ top: lastScrollY.current, behavior: "auto" });
