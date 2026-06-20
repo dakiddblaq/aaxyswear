@@ -37,10 +37,8 @@ export const createOrder = createServerFn({ method: "POST" })
     const { supabase, userId, claims } = context;
 
     // Require verified email server-side — never trust the client.
-    const emailConfirmedAt = (claims as Record<string, unknown>).email_confirmed_at as
-      | string
-      | undefined;
-    if (!emailConfirmedAt) {
+    const { data: userData, error: userErr } = await supabase.auth.getUser();
+    if (userErr || !userData.user?.email_confirmed_at) {
       throw new Error("EMAIL_NOT_VERIFIED");
     }
 
