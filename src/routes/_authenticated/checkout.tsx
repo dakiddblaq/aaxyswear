@@ -1,9 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
+import { useServerFn } from "@tanstack/react-start";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { PRODUCTS, PAYSTACK_URL } from "@/lib/products";
+import { supabase } from "@/integrations/supabase/client";
+import { createOrder } from "@/lib/orders.functions";
 
 const SHIPPING_OPTIONS = [
   { id: "economy", label: "AXYS Economy", price: 80, eta: "2–9 business days" },
@@ -18,7 +21,7 @@ const searchSchema = z.object({
   qty: z.number().min(1).max(10).default(1),
 });
 
-export const Route = createFileRoute("/checkout")({
+export const Route = createFileRoute("/_authenticated/checkout")({
   validateSearch: (s) => searchSchema.parse(s),
   head: () => ({ meta: [{ title: "Checkout — AXYS Wear" }] }),
   component: CheckoutPage,
@@ -39,18 +42,31 @@ const initial: FormState = {
 function CheckoutPage() {
   const { product: productId, color, size, qty } = Route.useSearch();
   const navigate = useNavigate();
+  const submitOrder = useServerFn(createOrder);
   const product = useMemo(() => PRODUCTS.find((p) => p.id === productId) ?? PRODUCTS[0], [productId]);
+
+  const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
+  const [userEmail, setUserEmail] = useState("");
   const [form, setForm] = useState<FormState>(initial);
   const [confirmed, setConfirmed] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-
   const [shippingId, setShippingId] = useState<ShippingId>("economy");
   const shipping = SHIPPING_OPTIONS.find((s) => s.id === shippingId)!;
 
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const u = data.user;
+      setEmailVerified(!!u?.email_confirmed_at);
+      if (u?.email) {
+        setUserEmail(u.email);
+        setForm((f) => (f.email ? f : { ...f, email: u.email ?? "" }));
+      }
+    });
+  }, []);
+
   const subtotal = product.price * qty;
-  const deliveryFee = shipping.price;
-  const total = subtotal + deliveryFee;
+  const total = subtotal + shipping.price;
 
   function set<K extends keyof FormState>(k: K, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -73,28 +89,60 @@ function CheckoutPage() {
 
   async function submit(ev: React.FormEvent) {
     ev.preventDefault();
+    if (!emailVerified) return;
     if (!validate()) return;
     if (!confirmed) {
       setErrors((p) => ({ ...p, confirm: "Please confirm your order details before proceeding." }));
       return;
     }
     setLoading(true);
-    const orderId = "AXYS-" + Date.now().toString(36).toUpperCase();
     try {
-      localStorage.setItem(
-        "axys:lastOrder",
-        JSON.stringify({
-          orderId, status: "Awaiting Payment",
-          product: product.name, color, size, qty, subtotal,
-          shippingMethod: shipping.label, shippingEta: shipping.eta, deliveryFee, total,
-          customer: form, createdAt: new Date().toISOString(),
-        }),
-      );
-    } catch {}
-    await new Promise((r) => setTimeout(r, 3000));
-    const url = `${PAYSTACK_URL}?reference=${encodeURIComponent(orderId)}&amount=${total}&shipping=${encodeURIComponent(shipping.id)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
-    navigate({ to: "/success", search: { order: orderId } });
+      const result = await submitOrder({
+        data: {
+          productId: product.id,
+          productName: product.name,
+          color,
+          size,
+          quantity: qty,
+          unitPrice: product.price,
+          shippingMethod: shipping.id,
+          shippingFee: shipping.price,
+          total,
+          customer: form,
+        },
+      });
+      await new Promise((r) => setTimeout(r, 1800));
+      const url = `${PAYSTACK_URL}?reference=${encodeURIComponent(result.orderRef)}&amount=${result.total}&shipping=${encodeURIComponent(shipping.id)}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+      navigate({ to: "/success", search: { order: result.orderRef } });
+    } catch (err: any) {
+      setLoading(false);
+      const msg = String(err?.message ?? "");
+      if (msg.includes("EMAIL_NOT_VERIFIED")) {
+        setEmailVerified(false);
+      } else if (msg.includes("Unauthorized")) {
+        navigate({ to: "/auth", search: { mode: "signin", redirect: window.location.pathname + window.location.search } });
+      } else {
+        setErrors((p) => ({ ...p, submit: "Could not place your order. Please try again." }));
+      }
+    }
+  }
+
+  if (emailVerified === false) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="mx-auto max-w-md px-5 py-20 text-center">
+          <div className="eyebrow">Verification Required</div>
+          <h1 className="mt-2 font-display text-3xl font-black uppercase">Verify Your Email</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Please verify your email <span className="text-foreground">{userEmail}</span> before placing an order.
+          </p>
+          <Link to="/auth/verify" className="btn-primary mt-6 inline-block">Verify Email</Link>
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
   return (
@@ -205,7 +253,7 @@ function CheckoutPage() {
               </div>
               <div className="mt-5 space-y-1 border-t border-border pt-5 text-sm">
                 <Row k="Subtotal" v={`R${subtotal}`} />
-                <Row k="Delivery Fee" v={`R${deliveryFee}`} />
+                <Row k="Delivery Fee" v={`R${shipping.price}`} />
               </div>
               <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
                 <span className="text-xs uppercase tracking-[0.18em]">Total</span>
@@ -213,17 +261,17 @@ function CheckoutPage() {
               </div>
             </div>
 
-
             <label className="flex cursor-pointer items-start gap-3 border border-border bg-white p-4 text-sm">
               <input
                 type="checkbox"
                 checked={confirmed}
-                onChange={(e) => { setConfirmed(e.target.checked); if (e.target.checked) setErrors(({ confirm, ...rest }) => rest); }}
+                onChange={(e) => { setConfirmed(e.target.checked); if (e.target.checked) setErrors(({ confirm: _c, ...rest }) => rest); }}
                 className="mt-0.5 h-4 w-4 accent-black"
               />
               <span>I confirm my size, color, quantity and delivery details are correct.</span>
             </label>
             {errors.confirm && <div className="text-xs text-destructive">{errors.confirm}</div>}
+            {errors.submit && <div className="text-xs text-destructive">{errors.submit}</div>}
 
             <button type="submit" disabled={!confirmed || loading} className="btn-primary w-full">
               {loading ? "Processing…" : "Proceed To Secure Payment"}
