@@ -5,10 +5,22 @@ import { supabase } from "@/integrations/supabase/client";
 export function Header() {
   const navigate = useNavigate();
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setAuthed(!!data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setAuthed(!!s));
+    const check = async (userId: string | undefined) => {
+      if (!userId) return setIsAdmin(false);
+      const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
+      setIsAdmin(!!data);
+    };
+    supabase.auth.getSession().then(({ data }) => {
+      setAuthed(!!data.session);
+      check(data.session?.user.id);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+      setAuthed(!!s);
+      check(s?.user.id);
+    });
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -27,6 +39,9 @@ export function Header() {
           <a href="/#about" className="hover:text-muted-foreground">About</a>
           {authed ? (
             <>
+              {isAdmin && (
+                <Link to="/admin" className="hover:text-muted-foreground">Admin</Link>
+              )}
               <Link to="/account" className="hover:text-muted-foreground">Account</Link>
               <button onClick={signOut} className="hover:text-muted-foreground">Sign Out</button>
             </>
