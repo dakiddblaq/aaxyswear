@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_authenticated")({
     if (error || !data.user) {
       throw redirect({
         to: "/auth",
-        search: { redirect: location.href, mode: "signin" as const },
+        search: { redirect: location.pathname + location.search, mode: "signin" as const },
       });
     }
     return { user: data.user };
