@@ -31,7 +31,8 @@ function AuthPage() {
 
   function onAuthSuccess() {
     router.invalidate();
-    navigate({ to: redirect || "/", replace: true });
+    const dest = redirect && redirect.startsWith("/") ? redirect : "/";
+    navigate({ to: dest, replace: true });
   }
 
   return (
